@@ -1,32 +1,42 @@
----
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-deployment
+  name: hello-world-deployment
+  labels:
+    app: hello-world
 spec:
-  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-world
+  replicas: 2
   template:
     metadata:
       labels:
-        run: hello-world
+        app: hello-world
     spec:
       containers:
-      - name: hello
-        image: nginxdemos/hello:latest
+      - name: hello-world
+        image: bhargavshah86/kube-test:v0.1
         ports:
         - containerPort: 80
-
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: "250m"
+          requests:
+            memory: 128Mi
+            cpu: "80m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-service
-  labels:
-    run: hello-world
+  name: hello-world
 spec:
-  type: NodePort
-  ports:
-  - port: 80
-    protocol: TCP
   selector:
-    run: hello-world
+    app: hello-world
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30081   
+  type: NodePort
